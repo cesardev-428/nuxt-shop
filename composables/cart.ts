@@ -1,3 +1,4 @@
+
 export const useCart = () => {
  
  
@@ -8,9 +9,10 @@ export const useCart = () => {
       const data = await $fetch('/api/cart', {
         headers: useRequestHeaders(['cookie'])
       })
-      console.log("composables",data.cartItems as Array<CartItem>)
       
-      products.addProductsTocartCookie(data.cartItems as Array<CartItem>)
+      if(data){
+        products.addProductsTocartCookie(data.cartItems as Array<CartItem>)
+      }
     }
   }
   return {

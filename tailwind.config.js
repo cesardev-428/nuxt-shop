@@ -1,35 +1,91 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
+  darkMode: "class",
   content: [],
   theme: {
     extend: {
-      /* colors:{
-        primary:"#3730a3",
-        primaryl:"#4f46e5",
-        secondary:"#cbd5e1",
-        secondaryl:"#1e293b",
-      } */
-     colors:{
-      primary: "#7345D6 ",
-      bgPrimary:"#2C2C2C",
-      accentPrimary:"#7345D6",
-      textPrimary:"#F2F2F2",
-      hoverPrimary:"#5A34B3",
-      borderPrimary:"#525252",
-      /* secondary:"#FFC857",
-      enlaces:"#4285F4",
-      borderPrimary:"#525252", */
+      colors: {
+        // Colores Primarios
+        primary: {
+          DEFAULT: "#7345D6", // El color primario base
+          light: "#8C6CDA", // Una versión más clara del primario
+          dark: "#5B37A8", // Una versión más oscura del primario
+        },
 
-      textSecondary:"#1f1f23",
-      primaryl: "#7345D6",
-      bgPrimaryl:"#F2F2F2",
-      accentPrimaryl:"#7345D6",
-      textPrimaryl:"#2C2C2C",
-      hoverPrimaryl:"#5A34B3",
-      borderPrimaryl:"#D1D1D1",
-     }
+        // Colores de Contraste (para texto, iconos, etc.)
+        contrast: {
+          light: "#F8F8F8", // Blanco suave para texto en fondos oscuros (light mode)
+          dark: "#1A1A1A", // Negro suave para texto en fondos claros (dark mode)
+        },
+
+        // Colores de Acento (para botones, enlaces, etc. que necesitan destacar)
+        accent: {
+          DEFAULT: "#FF6F61", // Un rojo anaranjado que contrasta bien con el primario
+          light: "#FF8A80",
+          dark: "#E65C51",
+        },
+
+        // Colores Neutros/Grises (para fondos, bordes, texto secundario)
+        neutral: {
+          50: "#F9FAFB",
+          100: "#F3F4F6",
+          200: "#E5E7EB",
+          300: "#D1D5DB",
+          400: "#9CA3AF",
+          500: "#6B7280", // Gris medio
+          600: "#4B5563",
+          700: "#374151",
+          800: "#1F2937",
+          900: "#111827",
+        },
+
+        // Variables para el texto
+        textColor: {
+          // Modo claro (Light Mode)
+          light: {
+            DEFAULT: "#1a1a1a", // Texto principal en modo claro
+            secondary: "#4b5563", // Texto secundario en modo claro
+            hover: "#7345d6", // Hover de texto en modo claro
+          },
+          // Modo oscuro (Dark Mode)
+          dark: {
+            DEFAULT: "#f8f8f8", // Texto principal en modo oscuro
+            secondary: "#9ca3af", // Texto secundario en modo oscuro
+            hover: "#8c6cda", // Hover de texto en modo oscuro
+          },
+        },
+
+        // Variables para fondos
+        background: {
+          // Modo claro (Light Mode)
+          light: {
+            DEFAULT: "#f9fafb", // Fondo principal en modo claro
+            secondary: "#ffffff", // Fondo secundario (cards, secciones)
+            hover: "#f3f4f6", // Hover de fondos
+          },
+          // Modo oscuro (Dark Mode)
+          dark: {
+            DEFAULT: "#111827", // Fondo principal en modo oscuro
+            secondary: "#1f2937", // Fondo secundario (cards, secciones)
+            hover: "#374151", // Hover de fondos
+          },
+        },
+
+        // Variables para bordes
+        border: {
+          // Modo claro (Light Mode)
+          light: {
+            DEFAULT: "#d1d5db",
+            hover: "#9ca3af",
+          },
+          // Modo oscuro (Dark Mode)
+          dark: {
+            DEFAULT: "#4b5563",
+            hover: "#6b7280",
+          },
+        },
+      },
     },
   },
   plugins: [],
-}
-
+};

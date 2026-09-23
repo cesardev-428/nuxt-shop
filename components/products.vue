@@ -1,75 +1,153 @@
 <template>
-  <div class="flex justify-center flex-col items-center w-full h-screen"> 
+  <div
+    class="w-full min-h-[100vh]"
+    :class="{ 'flex flex-col items-center justify-center': props.loading }"
+  >
     <!-- <div class="text-sm flex flex-wrap gap-1 overflow-hidden py-3 max-h-[100px]" >
       <span class="bg-primary px-2 py-1 rounded hover:bg-white hover:text-indigo-600 text-white text-sm">Cooking</span>
     </div> -->
-    <div 
+    <div
       v-if="!props.loading"
-      class="cardDiv grid grid-cols-3 gap-4 w-full   ">
-      <div 
-        v-for="(product,i) in  productsStore.productsFormatted.slice((props.page-1)*6, props.page*6)"
-        :key="i"
-        class="card shadow-xl max-h-[425px] group/cart flex flex-col  rounded-lg px-6 py-4 cursor-pointer hover:scale-105 duration-200 ">
-        
-        <div class="w-full h-[400px] bg-slate-200 rounded-lg relative">
-          <div class=" justify-center flex  ">
-            <img :src="product.thumbnail" alt="">
-          </div>
-          <div 
-            @click="open(product) "
-            class="absolute w-12 h-12 rounded-full bg-gray-600 bottom-3 right-2 group/cartI  hover:bg-black invisible group-hover/cart:visible">
-            <div class="flex items-center justify-center h-full ">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-8 group-hover/cartI:fill-slate-300">
-                <path d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 0 0-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 0 0 0-1.5H5.378A2.25 2.25 0 0 1 7.5 15h11.218a.75.75 0 0 0 .674-.421 60.358 60.358 0 0 0 2.96-7.228.75.75 0 0 0-.525-.965A60.864 60.864 0 0 0 5.68 4.509l-.232-.867A1.875 1.875 0 0 0 3.636 2.25H2.25ZM3.75 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" />
+      class="cardDiv grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+    >
+      <div
+        v-for="(product, i) in productsStore.productsFormatted.slice(
+          (currentPage - 1) * 6,
+          currentPage * 6
+        )"
+        class="product aspect-square rounded-lg shadow-lg dark:bg-background-dark-secondary bg-background-light cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 bounce"
+      >
+        <img
+          class="p-2 rounded-lg w-full h-3/4 object-contain"
+          alt="product image"
+          :src="product.thumbnail"
+        />
+        <div class="px-5 pb-5 text-gray-900 dark:text-white">
+          <h5 class="text-xl font-semibold tracking-tight">
+            {{ product.title }}
+          </h5>
+          <p>{{ product.description }}</p>
+
+          <div class="flex items-center mt-2.5 mb-5">
+            <div class="flex items-center space-x-1 rtl:space-x-reverse">
+              <svg
+                class="w-4 h-4 text-yellow-300"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 22 20"
+              >
+                <path
+                  d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+                />
+              </svg>
+              <svg
+                class="w-4 h-4 text-yellow-300"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 22 20"
+              >
+                <path
+                  d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+                />
+              </svg>
+              <svg
+                class="w-4 h-4 text-yellow-300"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 22 20"
+              >
+                <path
+                  d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+                />
+              </svg>
+              <svg
+                class="w-4 h-4 text-yellow-300"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 22 20"
+              >
+                <path
+                  d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+                />
+              </svg>
+              <svg
+                class="w-4 h-4 text-gray-200 dark:text-gray-600"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 22 20"
+              >
+                <path
+                  d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+                />
               </svg>
             </div>
+            <span
+              class="text-xs font-semibold px-2.5 py-0.5 rounded-sm dark:bg-blue-200 ms-3"
+              >5.0</span
+            >
           </div>
-        </div>
-        <div class="flex flex-col items-start mt-auto py-4 ">
-          <h4 class="text-xl font-semibold dark:text-textPrimary text-textPrimaryl">{{product.title }}</h4>
-          <p class="text-sm dark:text-textPrimary text-textPrimaryl ">${{product.description }}</p>
-          <div>
-            <span class="text-2xl dark:text-textPrimary text-textPrimaryl">${{product.price}}</span>
-            <span class="text-2xl dark:text-textPrimary text-textPrimaryl">/</span>
-            <span class=" text-xl text-red-800 dark:text-red-400 line-through ">{{ (product.price as number + ((product.price as number*30)/100)).toFixed(2) }}</span>
-            <span class=" text-xl text-red-800 dark:text-red-400  ">   30% desc</span>
+          <div class="flex items-center justify-between">
+            <span
+              class="text-3xl font-bold text-gray-900 dark:text-white hover:text"
+              >${{ product.price }}</span
+            >
+            <button
+              @click="open(product)"
+              class="button bg-primary dark:hover:bg-primary/50 hover:bg-primary-dark text-textColor-dark px-4 py-2 rounded-lg transition-colors duration-300"
+            >
+              <span class="label">Add to card</span>
+              <span class="gradient-container">
+                <span class="gradient"></span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
-      
-    </div >
-    <div v-else class="loader "></div>
+    </div>
+
+    <div v-else class="loader"></div>
   </div>
-  
-  <Transition name="bounce">
-    <modalAddCart v-if="openModal && productSelected " @close="openModal = false" :product="productSelected"  />
-  </Transition>
+
+  <modalAddCart
+    v-if="openModal && productSelected"
+    @close="openModal = false"
+    :product="productSelected"
+  />
 </template>
 <script setup lang="ts">
-  import modalAddCart from './modalAddCart.vue';
-  const productsStore = useProductStore()
-  const openModal = ref(false)
-  const productSelected = ref<Product>()
-  
-  const props = defineProps({
-    page: { type: Number, default: 1 },
-    loading: { type: Boolean, default: false }
-  })
+import modalAddCart from "./modalAddCart.vue";
 
-  
-  const open = (product: Product ) => {
-    if(!product) return
-    productSelected.value = product
-    openModal.value = true
-  }
+const currentPage = useState<number>("currentPage");
 
+const productsStore = useProductStore();
+const openModal = ref(false);
+const productSelected = ref<Product>();
+
+const props = defineProps({
+  page: { type: Number, default: 1 },
+  loading: { type: Boolean, default: true },
+});
+
+const open = (product: Product) => {
+  if (!product) return;
+
+  productSelected.value = product;
+  openModal.value = true;
+};
 </script>
 
 <style>
-.cardDiv{
+.cardDiv {
   transition: all 0.3s ease;
 }
-
+/* .product{
+  height: 5%;
+} */
 
 .bounce-enter-active {
   animation: bounce-in 0.5s;
@@ -89,18 +167,48 @@
   }
 }
 
+:root {
+  --bg-loader: #000;
+  --bg-loader-f: #0002;
+}
+.dark-mode {
+  --bg-loader: #777;
+  --bg-loader-f: #7772;
+}
 
-/* HTML: <div class="loader"></div> */
 .loader {
-  width: 15px;
+  width: 30px;
   aspect-ratio: 1;
   border-radius: 50%;
   animation: l5 1s infinite linear alternate;
 }
 @keyframes l5 {
-    0%  {box-shadow: 20px 0 #000, -20px 0 #0002;background: #000 }
-    33% {box-shadow: 20px 0 #000, -20px 0 #0002;background: #0002}
-    66% {box-shadow: 20px 0 #0002,-20px 0 #000; background: #0002}
-    100%{box-shadow: 20px 0 #0002,-20px 0 #000; background: #000 }
+  0% {
+    box-shadow: 40px 0 var(--bg-loader), -40px 0 var(--bg-loader-f);
+    background: var(--bg-loader);
+  }
+  33% {
+    box-shadow: 40px 0 var(--bg-loader), -40px 0 var(--bg-loader-f);
+    background: var(--bg-loader-f);
+  }
+  66% {
+    box-shadow: 40px 0 var(--bg-loader-f), -40px 0 var(--bg-loader);
+    background: var(--bg-loader-f);
+  }
+  100% {
+    box-shadow: 40px 0 var(--bg-loader-f), -40px 0 var(--bg-loader);
+    background: var(--bg-loader);
+  }
 }
+
+.CardContent_Container__LsOdx {
+  width: 100%;
+  height: calc(100% - 105px);
+  aspect-ratio: 1/1;
+}
+
+/* img {
+  width: 500px;
+  height: 300px;
+} */
 </style>

@@ -6,7 +6,6 @@ export default defineEventHandler(event => {
     cart = { cartItems: [] }
   } */
   
-
   // Send JSON response
   return JSON.parse(cart as string)
 })

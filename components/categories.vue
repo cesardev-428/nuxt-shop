@@ -1,95 +1,78 @@
 <template>
-<div class="p-12 dark:bg-textSecondary  rounded h-full shadow-2xl ">
-  <!-- <h5 class=" font-semibold mb-4 text-sm leading-6 text-primary dark:text-primaryl">On this page</h5> -->
-  <ul class="text-slate-700 text-sm leading-6">
-    <li>
-      <a href="#basic-usage" class="block py-1 text-xl font-medium text-textPrimaryl dark:text-textPrimary"> 
-        Categories
-      </a>
-    </li>
-    <tree :Nodes="nodes"></tree>
+  <li
+    class="text-base font-semibold px-2 py-2 rounded cursor-pointer hover:dark:bg-gray-700 hover:bg-gray-400 hover:text-gray-300 flex items-center"
+  >
+    <router-link
+      @click="selectCategory(props.Node.id as string)"
+      :to="'?category=' + props.Node.label"
+      class="w-full h-full transition-all duration-200"
+      :class="
+        categoryStore.categorySelected === props.Node.id
+          ? 'text-primary bold scale-105'
+          : 'text-textColor-light dark:text-textColor-dark'
+      "
+      >{{ props.Node.label }}</router-link
+    >
 
+    <div
+      :class="{
+        'hidden  ': !(props.Node.children && props.Node.children.length > 0),
+      }"
+      @click="dropdown = !dropdown"
+      class="cursor-pointer ml-auto p-1 rounded-full flex items-center hover:dark:bg-neutral-800 hover:bg-gray-300 hover:text-gray-800 dark:hover:text-gray-300 transition-all duration-200"
+    >
+      <Icon
+        class="transition-all duration-200"
+        name="iconamoon:arrow-right-2-light"
+        size="20"
+        :class="{
+          'rotate-90': dropdown,
+          'text-primary bold scale-105':
+            categoryStore.categorySelected === props.Node.id,
+          'text-textColor-light dark:text-textColor-dark':
+            categoryStore.categorySelected !== props.Node.id,
+        }"
+      >
+      </Icon>
+    </div>
+  </li>
+  <ul
+    v-if="props.Node.children && props.Node.children.length > 0 && dropdown"
+    class="ml-3"
+  >
+    <categories
+      v-if="props.Node.children && props.Node.children.length > 0"
+      v-for="(child, index) in props.Node.children"
+      :Node="child"
+      :key="index"
+    ></categories>
   </ul>
-</div>
 </template>
 <script setup lang="ts">
- import tree from '~/components/tree.vue';
+const props = defineProps({
+  Node: { type: Object, default: [], required: false },
+});
+const categoryStore = useCategoryStore();
+const dropdown = ref(true);
+const productsComposable = useProduct();
+const productsStore = useProductStore();
+const selectCategory = async (id: string) => {
+  productsStore.clearProducts();
 
- /* const nodes = ref(Array[Tree]) */
-
-  const nodes = computed<Array<Tree>>(() => {
-    const tdata:Array<Tree> = [
-    {
-      id: 1,
-      label: 'Foods',
-      children: [
-        {
-          id: 2,
-          label: 'Fruits',
-          children: [
-            {
-              id: 3,
-              label: 'Banana'
-            },
-            {
-              id: 4,
-              label: 'Apple'
-            },
-            {
-              id: 5,
-              label: 'Strawberry'
-            }
-          ]
-        },
-        {
-          id: 6,
-          label: 'Vegetables',
-          children: [
-            {
-              id: 7,
-              label: 'Carrot'
-            },
-            {
-              id: 8,
-              label: 'Lettuce'
-            },
-            {
-              id: 9,
-              label: 'Potato'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: 10,
-      label: 'Drinks',
-      children: [
-        {
-          id: 11,
-          label: 'Beers',
-          children: [
-            {
-              id: 12,
-              label: 'Budweiser'
-            },
-            {
-              id: 13,
-              label: 'Heineken'
-            }
-          ]
-        },
-        {
-          id: 14,
-          label: 'Wines'
-        },
-        {
-          id: 15,
-          label: 'Whiskey'
-        }
-      ]
-    }
-  ]
-    return tdata
-})
+  categoryStore.setCategorySelected(id);
+  try {
+    const data = await $fetch(
+      `/api/products/getProducts?limit=${6}&page=${1}&category=${
+        categoryStore.categorySelected
+      }`
+    );
+    const total = await productsComposable.getLength(
+      categoryStore.categorySelected as string
+    );
+    productsStore.setPages(total, 6);
+    productsStore.setProducts(data.products);
+  } catch (err: any) {
+    console.error(err);
+  }
+};
 </script>
