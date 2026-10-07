@@ -1,28 +1,35 @@
-import { createClient } from '@supabase/supabase-js'
+import { db, schema } from "@nuxthub/db";
+import { and, eq, sql } from "drizzle-orm";
+
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const configEnv = useRuntimeConfig()
-  const client = createClient(configEnv.supabaseUrl,configEnv.supabaseKey)
+  const query = getQuery(event);
 
+  const page = Number(query.page);
+  const limit = Number(query.limit);
+  const category = Number(query.category);
+  const tag = typeof query.tag === "string" && query.tag ? query.tag : null;
 
-  const page = query.page as number
-  const limit = query.limit as number
-  const category = query.category as number
-  
-  if(category) {
-    const { data, error } = await client.from('Products').select().eq('category_id',category).limit(limit).range((limit*page) - limit ,( (limit*page) - 1))
-
-    if(error) {
-      throw createError(error)
-    }
-    return {products:data}
-  }else{
-    const { data, error } = await client.from('Products').select().limit(limit).range((limit*page) - limit ,( (limit*page) - 1))
-    if(error) {
-      throw createError(error)
-    }
-    return {products:data}
+  const conditions = [];
+  if (category) {
+    conditions.push(eq(schema.products.category_id, category));
   }
-})
+  // Filtra productos cuyo array tag_id contiene la etiqueta indicada (por nombre)
+  if (tag) {
+    conditions.push(sql`EXISTS (
+      SELECT 1
+      FROM json_each(${schema.products.tag_id}) AS jt
+      JOIN ${schema.tags} AS t ON t.id = jt.value
+      WHERE t.name = ${tag}
+    )`);
+  }
 
+  const data = await db
+    .select()
+    .from(schema.products)
+    .where(and(...conditions))
+    .orderBy(schema.products.id)
+    .limit(limit)
+    .offset(limit * page - limit);
 
+  return { products: data };
+});

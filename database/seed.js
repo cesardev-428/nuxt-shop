@@ -1,98 +1,126 @@
+import { createClient } from "@libsql/client";
 import { faker } from "@faker-js/faker";
-import { createClient } from "@supabase/supabase-js";
+import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { promisify } from "node:util";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const db = createClient({ url: "file:.data/db/sqlite.db" });
 
-let arrayIdCategories = [];
-let _arrayIdCategories = [];
+const scryptAsync = promisify(scrypt);
 
-let arrayIdTags = [];
+/* Admin por defecto — sobrescribir con ADMIN_EMAIL / ADMIN_PASSWORD en la shell */
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@store.example";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+
+async function hashPassword(password) {
+  const salt = randomBytes(16).toString("hex");
+  const derived = await scryptAsync(password, salt, 64, {
+    N: 16384,
+    r: 8,
+    p: 1,
+  });
+  return `scrypt$${salt}$${derived.toString("hex")}`;
+}
+
+const seedAdmin = async () => {
+  const existing = await db.execute({
+    sql: "SELECT id FROM Users WHERE email = ?",
+    args: [ADMIN_EMAIL.toLowerCase()],
+  });
+  if (existing.rows.length > 0) {
+    console.log(`Admin already exists: ${ADMIN_EMAIL}`);
+    return;
+  }
+  await db.execute({
+    sql: "INSERT INTO Users (email, name, password_hash, role) VALUES (?, ?, ?, ?)",
+    args: [
+      ADMIN_EMAIL.toLowerCase(),
+      "Store Admin",
+      await hashPassword(ADMIN_PASSWORD),
+      "admin",
+    ],
+  });
+  console.log(`Admin seeded: ${ADMIN_EMAIL}`);
+};
 
 const seedCategories = async (numEntries) => {
-  const categories = [];
+  const values = Array.from({ length: numEntries }, () => [
+    faker.commerce.department(),
+    faker.lorem.words(10),
+  ]);
+  await db.execute({
+    sql: `INSERT INTO Categories (name, description, category_id) VALUES ${values
+      .map(() => "(?, ?, NULL)")
+      .join(", ")}`,
+    args: values.flat(),
+  });
 
-  for (let i = 0; i < numEntries; i++) {
-    // create an object of fake data and pass it to the products array
-    categories.push({
-      name: faker.commerce.department(),
-      description: faker.lorem.words(10),
-      category_id: null,
+  const { rows } = await db.execute("SELECT id FROM Categories ORDER BY id");
+  const ids = rows.map((row) => Number(row.id));
+
+  // pool de padres posibles: nulls intercalados con ids (como el original), excluyendo el propio id
+  const parentPool = [];
+  ids.forEach((id, i) => {
+    if (i % 2 === 0) parentPool.push(null);
+    parentPool.push(id);
+  });
+
+  for (const id of ids) {
+    const candidates = parentPool.filter((parent) => parent !== id);
+    await db.execute({
+      sql: "UPDATE Categories SET category_id = ? WHERE id = ?",
+      args: [faker.helpers.arrayElement(candidates), id],
     });
   }
-  // query supabase to create the data rows from the products array
-  const { data, error } = await supabase
-    .from("Categories")
-    .insert(categories)
-    .select("id");
-  arrayIdCategories = data.map((category) => category.id);
 
-  for (let i = 0; i < arrayIdCategories.length; i++) {
-    const id = arrayIdCategories[i];
-    if (i % 2 === 0) {
-      _arrayIdCategories.push(null);
-    }
-    _arrayIdCategories.push(id);
-  }
-
-  //update all the category_id with the id of the parent category.id or null
-  for (let i = 0; i < numEntries; i++) {
-    /* const index = await getIndex(_arrayIdCategories.length) */
-    await supabase
-      .from("Categories")
-      .update({ category_id: faker.helpers.arrayElement(_arrayIdCategories) })
-      .eq("id", arrayIdCategories[i])
-      .select();
-  }
+  return ids;
 };
 
 const seedTags = async (numEntries) => {
-  const tags = [];
+  const values = Array.from({ length: numEntries }, () => [
+    faker.commerce.productAdjective(),
+  ]);
+  await db.execute({
+    sql: `INSERT INTO Tags (name) VALUES ${values.map(() => "(?)").join(", ")}`,
+    args: values.flat(),
+  });
 
-  for (let i = 0; i < numEntries; i++) {
-    // create an object of fake data and pass it to the products array
-    tags.push({
-      name: faker.commerce.productAdjective(),
-    });
-  }
-  // query supabase to create the data rows from the products array
-  const { data, error } = await supabase.from("Tags").insert(tags).select("id");
-  arrayIdTags = data.map((tag) => tag.id);
-  console.log("Array of Tag IDs:", arrayIdTags);
+  const { rows } = await db.execute("SELECT id FROM Tags ORDER BY id");
+  return rows.map((row) => Number(row.id));
 };
 
-const seedProducts = async (numEntries) => {
-  const products = [];
-
-  for (let i = 0; i < numEntries; i++) {
-    // create an object of fake data and pass it to the products array
-    products.push({
-      title: faker.commerce.product(),
-      description: faker.lorem.words(10),
-      price: faker.number.float({ min: 2, max: 100, multipleOf: 0.02 }),
-      thumbnail: null,
-      category_id: faker.helpers.arrayElement(arrayIdCategories),
-      tag_id: faker.helpers.arrayElements(arrayIdTags, {
+const seedProducts = async (numEntries, categoryIds, tagIds) => {
+  const values = Array.from({ length: numEntries }, () => [
+    faker.commerce.product(),
+    faker.lorem.words(10),
+    faker.number.float({ min: 2, max: 100, multipleOf: 0.02 }),
+    null,
+    faker.helpers.arrayElement(categoryIds),
+    JSON.stringify(
+      faker.helpers.arrayElements(tagIds, {
         min: 1,
         max: 5,
       }),
-    });
-  }
-  // query supabase to create the data rows from the products array
-  const { data, error } = await supabase
-    .from("Products")
-    .insert(products)
-    .select("id");
+    ),
+  ]);
+  await db.execute({
+    sql: `INSERT INTO Products (title, description, price, thumbnail, category_id, tag_id) VALUES ${values
+      .map(() => "(?, ?, ?, ?, ?, ?)")
+      .join(", ")}`,
+    args: values.flat(),
+  });
 
-  if (error) {
-    console.error("Error inserting products:", error);
-  } else {
-    console.log("Products seeded successfully.");
-  }
+  console.log("Products seeded successfully.");
 };
 
-await seedCategories(20);
-await seedTags(50);
-await seedProducts(100);
+try {
+  const categoryIds = await seedCategories(100);
+  const tagIds = await seedTags(500);
+  await seedProducts(1000, categoryIds, tagIds);
+  await seedAdmin();
+  console.log("Seeded: 100 categories, 500 tags, 1000 products, 1 admin.");
+} catch (error) {
+  if (String(error).includes("no such table")) {
+    console.error("Tables not found. Run `npm run db:migrate` first.");
+  }
+  throw error;
+}

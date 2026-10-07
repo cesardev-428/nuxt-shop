@@ -1,10 +1,9 @@
+import { defineNuxtConfig } from "nuxt/config";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
-  future: {
-    compatibilityVersion: 4,
-  },
 
   //server
   /* devServer: {
@@ -15,9 +14,30 @@ export default defineNuxtConfig({
     "@nuxtjs/tailwindcss",
     "@pinia/nuxt",
     "@nuxtjs/color-mode",
-    "@nuxtjs/supabase",
+    "@nuxthub/core",
     "@nuxt/icon",
   ],
+
+  app: {
+    head: {
+      title: "store. — Everything you need, nothing you don't",
+      meta: [
+        {
+          name: "description",
+          content:
+            "A tech-minimalist online store. Curated tech, home and everyday essentials — free shipping over $50.",
+        },
+      ],
+      link: [
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
+        },
+      ],
+    },
+  },
 
   colorMode: {
     classSuffix: "", // Esto asegura que la clase sea 'dark' y no 'dark-mode'
@@ -25,13 +45,13 @@ export default defineNuxtConfig({
     fallback: "light",
   },
 
-  supabase: {
-    redirect: false,
+  runtimeConfig: {
+    // Secret para el JWT del backoffice — sobrescribir con NUXT_JWT_SECRET en producción
+    jwtSecret: "",
   },
 
-  runtimeConfig: {
-    // Will be available in both server and client
-    supabaseUrl: process.env.SUPABASE_URL,
-    supabaseKey: process.env.SUPABASE_KEY,
+  hub: {
+    // SQLite local (LibSQL) en .data/db/sqlite.db para desarrollo/testing
+    db: "sqlite",
   },
 });

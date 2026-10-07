@@ -1,25 +1,19 @@
-import { createClient } from "@supabase/supabase-js";
-export default defineEventHandler(async (event) => {
-  const configEnv = useRuntimeConfig();
-  const client = createClient(configEnv.supabaseUrl, configEnv.supabaseKey);
+import { db, schema } from "@nuxthub/db";
+import { desc, inArray } from "drizzle-orm";
 
+export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const Id_tags = body.Id_tags || [];
-  const { data, error } = await client
-    .from("Tags")
-    .select()
-    .in("id", Id_tags)
-    .order("created_at", { ascending: false });
-  if (error) {
-    console.error("Error fetching tags from products:", error);
-    throw createError(error);
+  const Id_tags: number[] = (body.Id_tags || []).map(Number);
+
+  if (Id_tags.length === 0) {
+    return [];
   }
 
-  /* const { data, error } = await client.from("Tags").select();
-  if (error) {
-    console.error("Error fetching categories:", error);
-    throw createError(error);
-  } */
+  const data = await db
+    .select()
+    .from(schema.tags)
+    .where(inArray(schema.tags.id, Id_tags))
+    .orderBy(desc(schema.tags.created_at));
 
   return data;
 });

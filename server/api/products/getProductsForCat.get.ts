@@ -1,24 +1,20 @@
-import { createClient } from "@supabase/supabase-js";
+import { db, schema } from "@nuxthub/db";
+import { eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
 
-  const configEnv = useRuntimeConfig();
-  const client = createClient(configEnv.supabaseUrl, configEnv.supabaseKey);
+  const category = Number(query.category);
+  const page = Number(query.page);
+  const limit = Number(query.limit);
 
-  const category = query.category;
-  const page = query.page as number;
-  const limit = query.limit as number;
-
-  const { data, error } = await client
-    .from("Products")
+  const data = await db
     .select()
-    .eq("category_id", category)
+    .from(schema.products)
+    .where(eq(schema.products.category_id, category))
+    .orderBy(schema.products.id)
     .limit(limit)
-    .range(limit * page - limit, limit * page - 1);
-  if (error) {
-    throw createError(error);
-  }
+    .offset(limit * page - limit);
 
   return { products: data };
 });

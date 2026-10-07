@@ -5,85 +5,102 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Colores Primarios
+        // Acento principal — azul (tech-minimalist)
         primary: {
-          DEFAULT: "#7345D6", // El color primario base
-          light: "#8C6CDA", // Una versión más clara del primario
-          dark: "#5B37A8", // Una versión más oscura del primario
+          DEFAULT: "#2563EB",
+          light: "#3B82F6",
+          dark: "#1D4ED8",
         },
 
-        // Colores de Contraste (para texto, iconos, etc.)
+        // Blanco suave / negro suave (contraste tipográfico)
         contrast: {
-          light: "#F8F8F8", // Blanco suave para texto en fondos oscuros (light mode)
-          dark: "#1A1A1A", // Negro suave para texto en fondos claros (dark mode)
+          light: "#FAFAFA",
+          dark: "#0A0A0B",
         },
 
-        // Colores de Acento (para botones, enlaces, etc. que necesitan destacar)
+        // Acento secundario (badges, ofertas)
         accent: {
-          DEFAULT: "#FF6F61", // Un rojo anaranjado que contrasta bien con el primario
+          DEFAULT: "#FF6F61",
           light: "#FF8A80",
           dark: "#E65C51",
         },
 
-        // Colores Neutros/Grises (para fondos, bordes, texto secundario)
+        // Neutros / grises (blanco → gris claro → negro)
         neutral: {
-          50: "#F9FAFB",
-          100: "#F3F4F6",
-          200: "#E5E7EB",
-          300: "#D1D5DB",
-          400: "#9CA3AF",
-          500: "#6B7280", // Gris medio
-          600: "#4B5563",
-          700: "#374151",
-          800: "#1F2937",
-          900: "#111827",
+          50: "#FAFAFA",
+          100: "#F5F5F5",
+          200: "#E5E5E5",
+          300: "#D4D4D4",
+          400: "#A3A3A3",
+          500: "#737373",
+          600: "#525252",
+          700: "#404040",
+          800: "#262626",
+          900: "#171717",
         },
 
-        // Variables para el texto
+        // Texto
         textColor: {
-          // Modo claro (Light Mode)
           light: {
-            DEFAULT: "#1a1a1a", // Texto principal en modo claro
-            secondary: "#4b5563", // Texto secundario en modo claro
-            hover: "#7345d6", // Hover de texto en modo claro
+            DEFAULT: "#0A0A0B",
+            secondary: "#525252",
+            hover: "#2563EB",
           },
-          // Modo oscuro (Dark Mode)
           dark: {
-            DEFAULT: "#f8f8f8", // Texto principal en modo oscuro
-            secondary: "#9ca3af", // Texto secundario en modo oscuro
-            hover: "#8c6cda", // Hover de texto en modo oscuro
+            DEFAULT: "#FAFAFA",
+            secondary: "#A3A3A3",
+            hover: "#3B82F6",
           },
         },
 
-        // Variables para fondos
+        // Fondos
         background: {
-          // Modo claro (Light Mode)
           light: {
-            DEFAULT: "#f9fafb", // Fondo principal en modo claro
-            secondary: "#ffffff", // Fondo secundario (cards, secciones)
-            hover: "#f3f4f6", // Hover de fondos
+            DEFAULT: "#FAFAFA",
+            secondary: "#FFFFFF",
+            hover: "#F5F5F5",
           },
-          // Modo oscuro (Dark Mode)
           dark: {
-            DEFAULT: "#111827", // Fondo principal en modo oscuro
-            secondary: "#1f2937", // Fondo secundario (cards, secciones)
-            hover: "#374151", // Hover de fondos
+            DEFAULT: "#0A0A0B",
+            secondary: "#141416",
+            hover: "#1F1F23",
           },
         },
 
-        // Variables para bordes
+        // Bordes
         border: {
-          // Modo claro (Light Mode)
           light: {
-            DEFAULT: "#d1d5db",
-            hover: "#9ca3af",
+            DEFAULT: "#E5E5E5",
+            hover: "#A3A3A3",
           },
-          // Modo oscuro (Dark Mode)
           dark: {
-            DEFAULT: "#4b5563",
-            hover: "#6b7280",
+            DEFAULT: "#27272A",
+            hover: "#3F3F46",
           },
         },
+      },
+      fontFamily: {
+        sans: [
+          "Inter",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+        display: [
+          "Space Grotesk",
+          "Inter",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
       },
     },
   },

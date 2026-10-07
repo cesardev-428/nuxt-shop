@@ -1,31 +1,36 @@
-import { createClient } from "@supabase/supabase-js";
+import { db, schema } from "@nuxthub/db";
+import { count, sql } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
 
-  const configEnv = useRuntimeConfig();
-  const client = createClient(configEnv.supabaseUrl, configEnv.supabaseKey);
+  const page = Number(query.page);
+  const limit = Number(query.limit);
+  const tag = typeof query.tag === "string" && query.tag ? query.tag : null;
 
-  const page = query.page as number;
-  const limit = query.limit as number;
+  // Filtra productos cuyo array tag_id contiene la etiqueta indicada (por nombre)
+  const tagFilter = tag
+    ? sql`EXISTS (
+        SELECT 1
+        FROM json_each(${schema.products.tag_id}) AS jt
+        JOIN ${schema.tags} AS t ON t.id = jt.value
+        WHERE t.name = ${tag}
+      )`
+    : undefined;
 
-  const { data, error } = await client
-    .from("Products")
+  const data = await db
     .select()
+    .from(schema.products)
+    .where(tagFilter)
+    .orderBy(schema.products.id)
     .limit(limit)
-    .range(limit * page - limit, limit * page - 1);
-  if (error) {
-    throw createError(error);
-  }
+    .offset(limit * page - limit);
 
-  // get length of products
-  const { count, error: countError } = await client
-    .from("Products")
-    .select("*", { count: "exact" });
-  if (countError) {
-    throw createError(countError);
-  }
-  const totalProducts = count || 0;
+  const countRows = await db
+    .select({ count: count() })
+    .from(schema.products)
+    .where(tagFilter);
+  const totalProducts = countRows[0]?.count ?? 0;
 
   return { products: data, totalProducts: totalProducts };
 });

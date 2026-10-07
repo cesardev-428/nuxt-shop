@@ -1,13 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
-export default defineEventHandler(async (event) => {
-  const configEnv = useRuntimeConfig();
-  const client = createClient(configEnv.supabaseUrl, configEnv.supabaseKey);
+import { db, schema } from "@nuxthub/db";
 
-  const { data, error } = await client.from("Categories").select();
-  if (error) {
-    console.error("Error fetching categories:", error);
-    throw createError(error);
-  }
+export default defineEventHandler(async () => {
+  const data = await db
+    .select()
+    .from(schema.categories)
+    .orderBy(schema.categories.id);
 
   return data;
 });
